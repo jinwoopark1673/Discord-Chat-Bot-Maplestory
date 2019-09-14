@@ -15,10 +15,10 @@ public class gameInteraction {
     private final String flagMessage = "[알림] 플래그 참여좀 해주세요ㅜㅠㅜㅠㅜㅠㅜㅜㅠㅜㅜㅠㅠㅜㅠㅜㅜㅠㅠㅠㅜㅠㅜㅠㅜㅜㅠㅠㅜㅜㅠㅜㅠㅜㅠㅜㅠㅜ";
 
     /** Alarm messages for 11:45 pm.*/
-    private final String toDoMessage = "[알림] 몬파, 심볼일퀘, 유니온 코인, 마일리지적립 까먹지마새오!";
+    private final String toDoMessage = "[알림] 몬파, 심볼일퀘, 유니온 코인, 마일리지적립 까먹지마오!";
     private final String toDoMondayMessage = "[알림] 길축, 심볼일퀘, 유니온 코인, 마일리지적립!!! 'ㅅ'";
-    private final String toDoWednesdayMessage = "[알림] 몬파, 결정석판매, 심볼일퀘, 유니온 코인, 마일리지적립 체크하새오!";
-    private final String toDoSundayMessage = "[알림] 일요일몬파, 심볼일퀘, 유니온경쿠, 유니온 코인, 마일리지적립 받으새오!!";
+    private final String toDoWednesdayMessage = "[알림] 몬파, 결정석판매, 심볼일퀘, 유니온 코인, 마일리지적립 체크하세오!";
+    private final String toDoSundayMessage = "[알림] 일요일몬파, 심볼일퀘, 유니온경쿠, 유니온 코인, 마일리지적립 받으세오!!";
 
     /** Display message at help command run. */
     private final String helpMessage = "[커맨드 리스트]:[!릴경][!릴경설정][!알람설정][!시간] 건의사항은 귓으로 ㄱ";
