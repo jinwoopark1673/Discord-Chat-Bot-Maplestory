@@ -5,9 +5,9 @@ The program must contain 0.png, n.png, m.png, and fonttree.txt file in its root 
 
 Class interactions (Major ones and helper classes):
 
-Main -- GUI, jdaListener  
+Main -- [GUI, jdaListener]  
 |  
-gameInteraction -- jscomm, scheduler, Actions, discordUtilities  
+gameInteraction -- [jscomm, scheduler, Actions, discordUtilities]  
 |  
 gameScreenAudit   
 |  
