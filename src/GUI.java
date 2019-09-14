@@ -13,7 +13,7 @@ public class GUI extends JFrame {
         listener l= new listener();
         button.addActionListener(l);
         JTextField textbox = new JTextField("Your Character Name",16);
-        JTextField textboxPort = new JTextField("Arduino Port Num. Example: 6",16);
+        JTextField textboxPort = new JTextField("COM Port Num. Example: 6",16);
         textField = new JTextArea("Please press Start");
         JPanel p = new JPanel();
         p.add(textbox);
