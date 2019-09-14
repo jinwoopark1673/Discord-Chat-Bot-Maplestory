@@ -7,7 +7,7 @@ Class interactions:
 Main -- GUI, jdaListener  
 |  
 gameInteraction -- jscomm, scheduler, Actions, discordUtilities  
-||  
+|  
 gameScreenAudit -- capture  
-||  
+|  
 fontTree
