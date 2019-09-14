@@ -4,8 +4,8 @@ Provides support for various commands that is used for alarms and member access 
 
 Class interactions:
 
-Main -- GUI, jdaListener
-!
+Main -- GUI, jdaListener\n
+|
 gameInteraction -- jscomm, scheduler, Actions, discordUtilities
 ||
 gameScreenAudit -- capture
