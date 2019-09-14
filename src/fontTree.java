@@ -223,7 +223,7 @@ public class fontTree {
         return sb.toString();
     }
 
-    public char exactSearch1(BufferedImage img) {
+    public char exactSearch(BufferedImage img) {
         int x = 0;
         int y = 0;
         Node tree = _treeFinal;
