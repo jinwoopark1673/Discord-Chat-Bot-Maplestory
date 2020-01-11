@@ -7,12 +7,14 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.SocketTimeoutException;
 
 /** Responsible for converting the game chat screen to a BufferedImage for fontTree class to read.
  *  Used in gameScreenAudit class. */
 public class capture {
 
-    public capture() throws Exception {
+    public capture() throws AWTException{
+
         initialize();
     }
 
@@ -25,10 +27,12 @@ public class capture {
     }
 
     /** Finds the game window and records its location and size. */
-    public void initialize() throws Exception {
+    public void initialize() throws AWTException {
         String windowName = "MapleStory";
         int[] rect = {0, 0, 0, 0};
+
         User32.INSTANCE.GetWindowRect(User32.INSTANCE.FindWindow(null, windowName), rect);
+
         _rec = new Rectangle();
         _rec.x = rect[0];
         _rec.y = rect[1];
