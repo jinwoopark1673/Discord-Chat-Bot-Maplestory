@@ -1,9 +1,9 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.TimeUnit;
 
 /** Helper class that is responsible for cleaning the raw capture of the screen
  *  and used fontTree class to parse it.
@@ -17,10 +17,10 @@ public class gameScreenAudit extends Thread {
     final private int white = Color.WHITE.getRGB();
     final private int orange =  new Color(255, 163, 25).getRGB(); // friend
     final private int green1 = new Color(25, 255, 25).getRGB(); // private
-    final private int purple = new Color(240, 178, 255).getRGB(); // guild
     final private int green2 = new Color(178, 255, 132).getRGB(); // union
+    final private int yellow = new Color(255, 255, 25).getRGB(); // Item Link
 
-    public gameScreenAudit() throws Exception {
+    public gameScreenAudit() throws AWTException, IOException {
         _capture = new capture();
         _gameRec = _capture.getRect();
         _font = new fontTree("fonttree.txt");
@@ -34,7 +34,7 @@ public class gameScreenAudit extends Thread {
         ArrayList<String> readings = new ArrayList<>();
         for (int i = 0; i < numLines; i++) {
             BufferedImage line = getLine(chat, i);
-            String reading = _font.readString(line, new HashSet<>(Arrays.asList(green1, green2)));
+            String reading = _font.readString(line, new HashSet<>(Arrays.asList(green1, green2, yellow)));
             readings.add(reading);
         }
         _chatList = new ArrayList<>();
