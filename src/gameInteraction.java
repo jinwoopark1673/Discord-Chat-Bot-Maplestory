@@ -2,8 +2,8 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Message;
 import org.joda.time.LocalDateTime;
 
-import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -15,17 +15,14 @@ public class gameInteraction {
     private final String flagMessage = "[알림] 플래그 참여좀 해주세요ㅜㅠㅜㅠㅜㅠㅜㅜㅠㅜㅜㅠㅠㅜㅠㅜㅜㅠㅠㅠㅜㅠㅜㅠㅜㅜㅠㅠㅜㅜㅠㅜㅠㅜㅠㅜㅠㅜ";
 
     /** Alarm messages for 11:45 pm.*/
-    private final String toDoMessage = "[알림] 몬파, 심볼일퀘, 유니온 코인, 마일리지적립 까먹지마오!";
+    private final String toDoMessage = "[알림] 몬파, 심볼일퀘, 유니온 코인, 마일리지적립 까먹지마새오!";
     private final String toDoMondayMessage = "[알림] 길축, 심볼일퀘, 유니온 코인, 마일리지적립!!! 'ㅅ'";
-    private final String toDoWednesdayMessage = "[알림] 몬파, 결정석판매, 심볼일퀘, 유니온 코인, 마일리지적립 체크하세오!";
-    private final String toDoSundayMessage = "[알림] 일요일몬파, 심볼일퀘, 유니온경쿠, 유니온 코인, 마일리지적립 받으세오!!";
+    private final String toDoWednesdayMessage = "[알림] 몬파, 결정석판매, 심볼일퀘, 유니온 코인, 마일리지적립 체크하새오!";
+    private final String toDoSundayMessage = "[알림] 일요일몬파, 심볼일퀘, 유니온경쿠, 유니온 코인, 마일리지적립 받으새오!!";
 
     /** Display message at help command run. */
-    private final String helpMessage = "[커맨드 리스트]:[!릴경][!릴경설정][!알람설정][!시간] 건의사항은 귓으로 ㄱ";
-
-    // Event ~9/25
-    private final String chooMessage1 = "도깨비 경치 버프 받으세오";
-    private final String chooMessage2 = "도깨비 스텟 버프 받으세오";
+    private final String helpMessage = "[커맨드 목록] [!릴경][!릴경설정][!시간][!도움말][!디코주소]";
+    private final String linkMessage = "[디코 가입] _____Address______";
 
     /** User permission describes the level of control that each user gets.
      *  Used for Actions class and various functions. in gameInteraction class.*/
@@ -70,36 +67,12 @@ public class gameInteraction {
             add(Arrays.asList(30, 23, 7), toDoSundayMessage);
             add(Arrays.asList(45, 23, 7), toDoSundayMessage);
             add(Arrays.asList(55, 23, 7), toDoSundayMessage);
-            // Event ~9/25
-            add(Arrays.asList(15, 11), chooMessage1);
-            add(Arrays.asList(20, 11), chooMessage1);
-            add(Arrays.asList(15, 13), chooMessage1);
-            add(Arrays.asList(20, 13), chooMessage1);
-            add(Arrays.asList(15, 15), chooMessage1);
-            add(Arrays.asList(20, 15), chooMessage1);
-            add(Arrays.asList(15, 17), chooMessage1);
-            add(Arrays.asList(20, 17), chooMessage1);
-            add(Arrays.asList(15, 19), chooMessage1);
-            add(Arrays.asList(20, 19), chooMessage1);
-            add(Arrays.asList(15, 21), chooMessage1);
-            add(Arrays.asList(20, 21), chooMessage1);
-            add(Arrays.asList(15, 12), chooMessage2);
-            add(Arrays.asList(20, 12), chooMessage2);
-            add(Arrays.asList(15, 14), chooMessage2);
-            add(Arrays.asList(20, 14), chooMessage2);
-            add(Arrays.asList(15, 16), chooMessage2);
-            add(Arrays.asList(20, 16), chooMessage2);
-            add(Arrays.asList(15, 18), chooMessage2);
-            add(Arrays.asList(20, 19), chooMessage2);
-            add(Arrays.asList(15, 20), chooMessage2);
-            add(Arrays.asList(20, 20), chooMessage2);
-            add(Arrays.asList(15, 22), chooMessage2);
-            add(Arrays.asList(20, 22), chooMessage2);
         }};
         _lilAlarms = new HashSet<>();
         _userPrivilege = new HashMap<>() {{
             /** Hardcoded values for ownership. */
             // put("--Your--Owner--Character--Name--", 0);
+            put("admin", 0);
         }};
         Actions a = new Actions(this);
 
@@ -146,6 +119,7 @@ public class gameInteraction {
             put("!헬프", h);
             put("!가이드", h);
             put("!도움말", h);
+            put("!명령어", h);
             put("!h", h);
             put("!help", h);
             Actions.Action t = a.new timeAction();
@@ -153,8 +127,15 @@ public class gameInteraction {
             put("!타임", t);
             put("!t", t);
             put("!time", t);
+            Actions.Action ty = a.new typeAction();
+            put("!type", ty);
+            Actions.Action la = a.new linkAction();
+            put("!디코", la);
+            put("!디코주소", la);
         }};
         _messageHistoryTime = new long[3];
+        adminMsgPeriod = gui.getPeriod();
+        adminMsgAlert = new LocalDateTime().plusMinutes(adminMsgPeriod);
         myName = gui.getMyName();
         System.out.println(myName);
         lilMessage = getDiscordLilMessage();
@@ -170,17 +151,15 @@ public class gameInteraction {
             lilAlarmed = false;
             toDoAlarmed = false;
         }
-        if (!adminMessageAlarmed &&
-                (currentTime.getMinuteOfHour() == 0 || currentTime.getMinuteOfHour() == 20 || currentTime.getMinuteOfHour() == 40
-                || currentTime.getMinuteOfHour() == 10 || currentTime.getMinuteOfHour() == 30 || currentTime.getMinuteOfHour() == 50)) {
+        if (!adminMessageAlarmed && currentTime.getHourOfDay() == adminMsgAlert.getHourOfDay() && currentTime.getMinuteOfHour() == adminMsgAlert.getMinuteOfHour()) {
             List<Message> adminAlarm = _jda.getTextChannelById(Main.adminAlarmID).getHistory().retrievePast(100).complete();
-            for (Message m : adminAlarm) {
-                copyClipboard(m.getContentRaw());
+            for (int i = adminAlarm.size() - 1; i >= 0; i--) {
+                copyClipboard(adminAlarm.get(i).getContentRaw());
                 sendEnterPasteEnter();
             }
             adminMessageAlarmed = true;
-        } else if (adminMessageAlarmed && currentTime.getMinuteOfHour() != 0 && currentTime.getMinuteOfHour() != 20 && currentTime.getMinuteOfHour() != 40
-                && currentTime.getMinuteOfHour() != 10 && currentTime.getMinuteOfHour() != 30 && currentTime.getMinuteOfHour() != 50) {
+        } else if (adminMessageAlarmed && currentTime.getMinuteOfHour() != adminMsgAlert.getMinuteOfHour()) {
+            adminMsgAlert = currentTime.plusMinutes(adminMsgPeriod - 1);
             adminMessageAlarmed = false;
         }
         if (!lilAlarmed && _lilAlarms.contains(currentTime.plusMinutes(1).getMinuteOfHour())) { // Need to run lil alarm
@@ -261,11 +240,11 @@ public class gameInteraction {
         List<Message> adminCommands = _jda.getTextChannelById(Main.adminCommandsID).getHistory().retrievePast(100).complete();
         for (Message m : adminCommands) {
             m.delete().queue();
-            String[] chat = parseChat(myName + " : " + m.getContentRaw());
+            String[] chat = parseChat("admin : " + m.getContentRaw());
             if (_userCommands.containsKey(chat[3])) {
                 Actions.Action command = _userCommands.get(chat[3]);
                 command.execute(chat);
-                discordUtilities.sendMessage(_jda, Main.executeHistoryDiscordID, myName + " : " + m.getContentRaw());
+                discordUtilities.sendMessage(_jda, Main.executeHistoryDiscordID, "admin : " + m.getContentRaw());
             }
         }
     }
@@ -355,8 +334,13 @@ public class gameInteraction {
         paused = false;
     }
 
+    public void runTypeCall(String message) {
+        copyClipboard(message);
+        sendEnterPasteEnter();
+    }
+
     private void runLilAlarm() {
-        String msg = "[" + new LocalDateTime().plusHours(16).getMinuteOfHour() + "분이애오!] " + lilMessage;
+        String msg = "[" + new LocalDateTime().getMinuteOfHour() + "분이애오!] " + lilMessage;
         copyClipboard(msg + new String(new char[70 - msg.length()]).replace("\0", "@"));
         sendEnterPasteEnter();
     }
@@ -378,18 +362,8 @@ public class gameInteraction {
         }
     }
 
-    public void runAlarmSet(String message) {
-        if (message.split(" ", 2).length == 2) {
-            String alarmList = message.split(" ", 2)[1];
-            if (alarmList.matches("([0-9]|[0-5][0-9])|((([0-9]|[0-5][0-9]) )+([0-9]|[0-5][0-9]))")) {
-                _lilAlarms = new HashSet<>();
-                for (String s: alarmList.split(" ")) {
-                    _lilAlarms.add(Integer.parseInt(s));
-                }
-            }
-        } else if (message.split(" ", 2).length == 1) {
-            _lilAlarms = new HashSet<>();
-        }
+    public void runAlarmSet(HashSet<Integer> times) {
+        _lilAlarms = times;
     }
 
     public void runHelpCall() {
@@ -397,9 +371,14 @@ public class gameInteraction {
         sendEnterPasteEnter();
     }
 
+    public void runLinkCall() {
+        copyClipboard(linkMessage);
+        sendEnterPasteEnter();
+    }
+
     public void runLilCall() {
         if (!lilMessage.equals("")) {
-            copyClipboard("[릴경] " + lilMessage);
+            copyClipboard("[" + new LocalDateTime().getMinuteOfHour() + "분] " + lilMessage);
             sendEnterPasteEnter();
         } else {
             copyClipboard("[릴경]"  + new String[]{"ㅁㄹㅁㄹ","ㅁㄻㄻㄻㄹ", "몰라요", "없을걸?", "모르겠는데?"}[ThreadLocalRandom.current().nextInt(0 ,5)]);
@@ -450,6 +429,11 @@ public class gameInteraction {
     }
 
     private void sendEnterPasteEnter() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (lastMsg.equals(currentMsg)) {
             _sameMessageCount += 1;
         } else {
@@ -475,12 +459,17 @@ public class gameInteraction {
 
     private void copyClipboard(String msg) {
         try {
+            msg = msg.replaceAll("\"", "").trim();
             lastMsg = currentMsg;
             currentMsg = msg;
-            Runtime.getRuntime().exec("cmd /c cmd.exe /K \"echo " + msg + "|clip");
-        } catch (IOException e) {
+            Runtime.getRuntime().exec("cmd.exe /C echo|set/p=\"" + msg + "\"|clip");
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void replaceJDA(JDA jda) {
+        this._jda = jda;
     }
 
     private boolean lilAlarmed;
@@ -492,6 +481,8 @@ public class gameInteraction {
     private String myName;
     private String currentMsg = "";
     private String lastMsg = "";
+    private int adminMsgPeriod;
+    private LocalDateTime adminMsgAlert;
 
     private long[] _messageHistoryTime;
     private int _sameMessageCount;
