@@ -1,3 +1,7 @@
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /** Helper class that stores action for each command.
  *  Used in gameInteraction class. */
 public class Actions {
@@ -131,6 +135,24 @@ public class Actions {
         public void execute(String[] strs) {
             System.out.println("Setting lil message to " + strs[2]);
             _gi.runLilSet(strs[2]);
+
+            HashSet<Integer> numbers = new HashSet<>();
+            Pattern p = Pattern.compile("-?\\d+");
+            Matcher m = p.matcher(strs[2]);
+            while (m.find()) {
+                numbers.add(Integer.parseInt(m.group()));
+            }
+            HashSet<Integer> times = new HashSet<>();
+            for (Integer num : numbers) {
+                if (0 <= num && num <= 59) {
+                    if (num < 30 && numbers.contains(num + 30)) {
+                        times.add(num);
+                    } else if (num >= 30 && numbers.contains(num - 30)) {
+                        times.add(num);
+                    }
+                }
+            }
+            _gi.runAlarmSet(times);
         }
 
         public boolean isAcceptedUserType(String name) {
@@ -140,8 +162,10 @@ public class Actions {
 
     public  class alarmAction implements Action {
         public void execute(String[] strs) {
+            /**
             System.out.println("Set alarm period to " + strs[2]);
-            _gi.runAlarmSet(strs[2]);
+            _gi.runAlarmSet(strs[2]);*/
+            _gi.runTypeCall("이제 자동으로 알람 시간이 설정됩니다 위~잉위~잉");
         }
 
         public boolean isAcceptedUserType(String name) {
@@ -155,6 +179,19 @@ public class Actions {
             if (System.currentTimeMillis() - lilLastCalled > 5000) {
                 _gi.runLilCall();
                 lilLastCalled = System.currentTimeMillis();
+            }
+        }
+
+        public boolean isAcceptedUserType(String name) {
+            return _gi.hasPermission(name, gameInteraction.userPermission.BANNED);
+        }
+    }
+
+    public class linkAction implements Action {
+        public void execute(String[] strs) {
+            if (System.currentTimeMillis() - linkLastCalled > 5000) {
+                _gi.runLinkCall();
+                linkLastCalled = System.currentTimeMillis();
             }
         }
 
@@ -191,8 +228,23 @@ public class Actions {
         }
     }
 
+    public class typeAction implements Action {
+        public void execute(String[] strs) {
+            String chat = strs[2];
+            String[] split = chat.split(" ", 2);
+            if (split.length == 2) {
+                _gi.runTypeCall(split[1]);
+            }
+        }
+
+        public boolean isAcceptedUserType(String name) {
+            return _gi.hasPermission(name, gameInteraction.userPermission.DEVELOPER);
+        }
+    }
+
     private gameInteraction _gi;
     private long lilLastCalled;
     private long helpLastCalled;
     private long timeLastCalled;
+    private long linkLastCalled;
 }
