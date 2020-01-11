@@ -5,7 +5,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,21 +13,43 @@ import java.util.Set;
 public class fontTree {
     final private int black = Color.BLACK.getRGB();
 
+    private BufferedImage koreanA;
+    private BufferedImage koreanU;
+    private BufferedImage koreanYA;
+    private BufferedImage koreanYO;
+    private BufferedImage koreanE;
+    private BufferedImage koreanI;
+    private BufferedImage mmm;
+    private BufferedImage nnn;
+    private BufferedImage bracketBegin;
+    private BufferedImage bracketEnd;
+
+    public static void main(String[] args) throws Exception {
+        fontTree f = new fontTree();
+
+        StringBuilder sb = new StringBuilder();
+        generate(f._treeFinal, sb);
+        PrintWriter writer = new PrintWriter("dddddddd.txt", "UTF-8");
+        writer.println(sb.toString());
+        writer.close();
+    }
+
     /** Parses fonttree file as a binary tree. */
-    public fontTree(String location) throws Exception {
+    public fontTree(String ___) throws IOException {
         _treeFinal = new Node();
         Node pointer = _treeFinal;
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(location), StandardCharsets.UTF_8));
+        InputStream fonttree = this.getClass().getResourceAsStream("fonttree.txt");
+        BufferedReader in = new BufferedReader(new InputStreamReader(fonttree, StandardCharsets.UTF_8));
         String text = in.readLine();
         for (char c : text.toCharArray()) {
-            if (c == '0') {
+            if (c == 'ㅐ') {
                 pointer = pointer.parent;
-            } else if (c == 'm') {
+            } else if (c == 'ㅏ') {
                 if (pointer.zero == null) {
                     pointer.zero = new Node(pointer);
                 }
                 pointer = pointer.zero;
-            } else if (c == 'n') {
+            } else if (c == 'ㅓ') {
                 if (pointer.one == null) {
                     pointer.one = new Node(pointer);
                 }
@@ -37,6 +58,16 @@ public class fontTree {
                 pointer.key = c;
             }
         }
+        koreanA = ImageIO.read(this.getClass().getResource("koreanA.png"));
+        koreanU = ImageIO.read(this.getClass().getResource("koreanU.png"));
+        koreanYA = ImageIO.read(this.getClass().getResource("koreanYA.png"));
+        koreanYO = ImageIO.read(this.getClass().getResource("koreanYO.png"));
+        koreanE = ImageIO.read(this.getClass().getResource("koreanE.png"));
+        koreanI = ImageIO.read(this.getClass().getResource("koreanI.png"));
+        mmm = ImageIO.read(this.getClass().getResource("m.png"));
+        nnn = ImageIO.read(this.getClass().getResource("n.png"));
+        bracketBegin = ImageIO.read(this.getClass().getResource("bbegin.png"));
+        bracketEnd = ImageIO.read(this.getClass().getResource("bend.png"));
     }
 
     /** Creates BufferedImage for each character and appends them to the binary tree. */
@@ -55,16 +86,27 @@ public class fontTree {
             sb.add((char) i);
         }
         for (int i = 0x0021; i <= 0x007f; i++) {
-            if (i != 0x0060 && i != 0x0030 && i != 0x006e && i != 0x006d && i != 0x007c) {
+            if (i != 0x0060 && i != 0x006d && i != 0x006e /**&& i != 0x006d*/ && i != 0x007c) {
                 sb.add((char) i);
             }
         }
         for (int i = 0x3131; i <= 0x3163; i++) {
-            sb.add((char) i);
+            if (i != 0x314f && i != 0x3153 && i != 0x3151 && i != 0x3155 && i != 0x3150 && i != 0x3163) {
+                sb.add((char) i);
+            }
         }
         for (char s: sb) {
-            if (s != '\n') {
+            if (s == '|') {
+                appendTree(stringToBufferedImage("" + s, false), _treeFinal, 0, 0, 'l');
+            } else if (s != '\n') {
                 appendTree(stringToBufferedImage("" + s, false), _treeFinal, 0, 0, s);
+            }
+        }
+        for (char s: sb) {
+            if (s == '|') {
+                appendTree(stringToBufferedImage("" + s, true), _treeFinal, 0, 0, 'l');
+            } else if (s != '\n' && s != '옙' && s != '예' && s != '켸' && s != '엡' && s != '렙') {
+                appendTree(stringToBufferedImage("" + s, true), _treeFinal, 0, 0, s);
             }
         }
         appendTree(stringToBufferedImage(" ", false), _treeFinal, 0, 0, ' ');
@@ -76,20 +118,22 @@ public class fontTree {
             sb.append(n.key);
         }
         if (n.zero != null) {
-            sb.append('m');
+            sb.append('ㅏ');
             generate(n.zero, sb);
-            sb.append('0');
+            sb.append('ㅐ');
         }
         if (n.one != null) {
-            sb.append('n');
+            sb.append('ㅓ');
             generate(n.one, sb);
-            sb.append('0');
+            sb.append('ㅐ');
         }
     }
 
     private void appendTree(BufferedImage img, Node node, int x, int y, char result) {
         if (x == img.getWidth()) {
-            node.key = result;
+            if (node.key == '\0') {
+                node.key = result;
+            }
         } else {
             if (img.getRGB(x, y) == black) {
                 if (node.one == null) {
@@ -149,30 +193,91 @@ public class fontTree {
         return "";
     }
 
+    public String checkItemHover(BufferedImage img, HashSet<Integer> color) {
+        boolean begin = false;
+        String beforeBracket = "";
+        for (int i = 0; i < img.getWidth(); i++) {
+            if (!begin) {
+                if (i + bracketBegin.getWidth() <= img.getWidth()) {
+                    loop:
+                    for (int m = 0; m < bracketBegin.getWidth(); m++) {
+                        for (int n = 0; n < bracketBegin.getHeight(); n++) {
+                            if ((!color.contains(img.getRGB(i + m, n)) && bracketBegin.getRGB(m, n) == black)
+                                    || (color.contains(img.getRGB(i + m, n)) && bracketBegin.getRGB(m, n) != black)) {
+                                break loop;
+                            }
+                            if (m == bracketBegin.getWidth() - 1 && n == bracketBegin.getHeight() - 1) {
+                                beforeBracket = readString(img.getSubimage(0, 0, i, img.getHeight()), color);
+                                begin = true;
+                                break loop;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (i + bracketEnd.getWidth() <= img.getWidth()) {
+                    loop:
+                    for (int m = 0; m < bracketEnd.getWidth(); m++) {
+                        for (int n = 0; n < bracketEnd.getHeight(); n++) {
+                            if ((!color.contains(img.getRGB(i + m, n)) && bracketEnd.getRGB(m, n) == black)
+                                    || (color.contains(img.getRGB(i + m, n)) && bracketEnd.getRGB(m, n) != black)) {
+                                break loop;
+                            }
+                            if (m == bracketEnd.getWidth() - 1 && n == bracketEnd.getHeight() - 1) {
+                                String afterBracket = readString(img.getSubimage(i + bracketEnd.getWidth(), 0, img.getWidth() - i - bracketEnd.getWidth(), img.getHeight()), color);
+                                return beforeBracket + "[]" + afterBracket;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
     public String readString(BufferedImage img, HashSet<Integer> color) {
         if (!hasColor(img, color)) {
             return "";
         }
+        /*
+        String checkItemHover = checkItemHover(img, color);
+        if (!checkItemHover.isEmpty()) {
+            return checkItemHover;
+        }*/
         /** Lazy image search for 0, n, m because they are used in fonttree.txt. */
-        try {
-            BufferedImage zero = ImageIO.read(new File("0.png"));
-            BufferedImage n = ImageIO.read(new File("n.png"));
-            BufferedImage m = ImageIO.read(new File("m.png"));
-            for (int i = 0; i < img.getWidth(); i++) {
-                String result_zero = readString_imageSearch(img, zero, color, "0", i);
-                String result_n = readString_imageSearch(img, n, color, "n", i);
-                String result_m = readString_imageSearch(img, m, color, "m", i);
-                if (!result_zero.isEmpty()) {
-                    return result_zero;
-                }
-                if (!result_n.isEmpty()) {
-                    return result_n;
-                }
-                if (!result_m.isEmpty()) {
-                    return result_m;
-                }
+        for (int i = 0; i < img.getWidth(); i++) {
+            String result_a = readString_imageSearch(img, koreanA, color, "ㅏ", i);
+            if (!result_a.isEmpty()) {
+                return result_a;
             }
-        } catch (IOException e) {
+            String result_u = readString_imageSearch(img, koreanU, color, "ㅓ", i);
+            if (!result_u.isEmpty()) {
+                return result_u;
+            }
+            String result_ya = readString_imageSearch(img, koreanYA, color, "ㅑ", i);
+            if (!result_ya.isEmpty()) {
+                return result_ya;
+            }
+            String result_yo = readString_imageSearch(img, koreanYO, color, "ㅕ", i);
+            if (!result_yo.isEmpty()) {
+                return result_yo;
+            }
+            String result_e = readString_imageSearch(img, koreanE, color, "ㅐ", i);
+            if (!result_e.isEmpty()) {
+                return result_e;
+            }
+            String result_i = readString_imageSearch(img, koreanI, color, "ㅣ", i);
+            if (!result_i.isEmpty()) {
+                return result_i;
+            }
+            String result_m = readString_imageSearch(img, mmm, color, "m", i);
+            if (!result_m.isEmpty()) {
+                return result_m;
+            }
+            String result_n = readString_imageSearch(img, nnn, color, "n", i);
+            if (!result_n.isEmpty()) {
+                return result_n;
+            }
         }
         StringBuilder sb = new StringBuilder();
         int x = 0;
@@ -223,41 +328,11 @@ public class fontTree {
         return sb.toString();
     }
 
-    public char exactSearch(BufferedImage img) {
-        int x = 0;
-        int y = 0;
-        Node tree = _treeFinal;
-        while (x != img.getWidth()) {
-            if (img.getRGB(x, y) == black) {
-                tree = tree.one;
-                if (y == img.getHeight() - 1) {
-                    x += 1;
-                    y = 0;
-                } else {
-                    y += 1;
-                }
-            } else {
-                tree = tree.zero;
-                if (y == img.getHeight() - 1) {
-                    x += 1;
-                    y = 0;
-                } else {
-                    y += 1;
-                }
-            }
-        }
-        return tree.key;
-    }
-
     public BufferedImage stringToBufferedImage(String s, boolean isBold) {
         java.awt.image.BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics g = img.getGraphics();
         Font f;
-        if (isBold) {
-            f = new Font("돋움", 1, 11);
-        } else {
-            f = new Font("돋움", Font.PLAIN, 11);
-        }
+        f = new Font("돋움", Font.PLAIN, 11);
         g.setFont(f);
         FontRenderContext frc = g.getFontMetrics().getFontRenderContext();
         Rectangle2D rect = f.getStringBounds(s, frc);
@@ -271,6 +346,23 @@ public class fontTree {
         int y = fm.getAscent();
         g.drawString(s, x, y);
         g.dispose();
+        if (isBold) {
+            if (s.equals("]")) {
+                try {
+                    img = ImageIO.read(this.getClass().getResource("rightBold.png"));
+                } catch (Exception e) {
+                    System.exit(1);
+                }
+            } else {
+                for (int i = 1; i < img.getWidth(); i++) {
+                    for (int j = 0; j < img.getHeight(); j++) {
+                        if (img.getRGB(i, j) == black) {
+                            img.setRGB(i - 1, j, black);
+                        }
+                    }
+                }
+            }
+        }
         return img;
     }
 
